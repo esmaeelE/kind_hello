@@ -1,0 +1,36 @@
+# KinD (Kubernetes in Docker) cluster configuration
+# This file defines a multi-node local Kubernetes cluster for development and testing
+# this config file contains all config fields with comments
+# NOTE: this is not a particularly useful config file
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: multinode
+# patch the generated kubeadm config with some extra settings
+kubeadmConfigPatches:
+  - |
+    apiVersion: kubelet.config.k8s.io/v1beta1
+    kind: KubeletConfiguration
+    evictionHard:
+      nodefs.available: "0%"
+# patch it further using a JSON 6902 patch
+kubeadmConfigPatchesJSON6902:
+  - group: kubeadm.k8s.io
+    version: v1beta3
+    kind: ClusterConfiguration
+    patch: |
+      - op: add
+        path: /apiServer/certSANs/-
+        value: my-hostname
+# 1 control plane node and 3 workers
+nodes:
+  # the control plane node config
+  - role: control-plane
+    # expose port 30080 in the cluster
+    extraPortMappings:
+      - containerPort: 30080
+        hostPort: 30080
+        protocol: TCP
+  # the three workers
+  - role: worker
+  - role: worker
+  - role: worker
