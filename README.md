@@ -8,6 +8,7 @@
 
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-v1.37.0-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io/)
 [![KinD](https://img.shields.io/badge/KinD-local%20cluster-003D7C&logo=kubernetes&logoColor=white)](https://kind.sigs.k8s.io/)
+[![Podman or Docker](https://img.shields.io/badge/Podman%20or%20Docker-1d6a4c?style=for-the-badge&logo=podman)](https://docs.docker.com/get-docker/)
 [![License](https://img.shields.io/badge/license-GPL--3.0-green)](LICENSE)
 
 <br>
