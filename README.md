@@ -37,6 +37,7 @@
 - [🏁 Quick Start](#-quick-start)
 - [📁 Repository Layout](#-repository-layout)
 - [🏗 Architecture](#-architecture)
+- [🧠 How It All Fits Together](#-how-it-all-fits-together)
 - [✅ Prerequisites](#-prerequisites)
 - [🚀 Step 1 — Create the Cluster](#-step-1--create-the-cluster)
 - [🔍 Step 2 — Verify the Cluster](#-step-2--verify-the-cluster)
@@ -163,6 +164,65 @@ graph TB
     style DEP fill:#e6f7ef,stroke:#009639
     style SVC fill:#fff2ee,stroke:#E6522C
 ```
+
+---
+
+## 🧠 How It All Fits Together
+
+Four building blocks, each backed by a file in this repo:
+
+| # | 🧱 Layer | 📄 Defined in | 👀 See it with |
+| --- | --- | --- | --- |
+| 1️⃣ | **☸️ Cluster** — the whole Kubernetes system | `config.yaml` | `kubectl cluster-info` |
+| 2️⃣ | **👷 Nodes** — the 4 machines it runs on | `config.yaml` → `nodes:` | `kubectl get nodes` |
+| 3️⃣ | **🚀 Deployment** — *what* should run (3 nginx pods) | `deployment.yaml` | `kubectl get deploy` |
+| 4️⃣ | **🌍 Service** — *how* to reach it (port 30080) | `service.yaml` | `kubectl get svc` |
+
+### ☸️ The cluster
+
+The **cluster** is the Kubernetes control system itself: API server, etcd, scheduler and controller-manager, plus the worker machines. `kind create cluster --config config.yaml` builds one out of plain containers on your machine, names it `multinode`, and points `kubectl` at the context `kind-multinode`. Everything below lives *inside* this — and `kind delete cluster` takes all of it away in one go.
+
+### 👷 The nodes
+
+**Nodes** are the machines (here: containers) that do the actual work — **1 control-plane + 3 workers**:
+
+- **Control-plane** — runs the brain (`kube-apiserver`, `etcd`, scheduler, controller-manager). In this config it also carries the `extraPortMappings` entry, so it's the door between your `localhost:30080` and the cluster.
+- **Workers** — where application pods are scheduled. The scheduler spreads the 3 nginx replicas across them, so if one worker dies only *one* replica is briefly lost — the Deployment replaces it immediately.
+
+All four boot from the same digest-pinned image (`kindest/node:v1.37.0@sha256:…`), so every node is identical and reproducible.
+
+### 🚀 The Deployment — *what* runs
+
+`deployment.yaml` declares a **desired state**: *"there must always be 3 nginx pods"*. The Deployment controller watches reality and fixes the gap:
+
+- **Creates** pods until 3 exist, **replaces** any that crash or get evicted 🔄
+- Groups them with the label `app: nginx` — the hook that both the Deployment and the Service use 🏷️
+- The **readiness probe** gates what counts as *Ready*: a pod only enters rotation once it really answers HTTP ✅
+
+`kubectl get deployments` showing `3/3` means: desired 3, healthy 3 — not merely "3 containers started".
+
+### 🌍 The Service — *how* you reach it
+
+Pods are **ephemeral** — they get new IPs every time they're replaced, so you can't hard-wire them. A **Service** provides one stable address (`nginx-service`) in front of them:
+
+- **Selector** `app: nginx` → Kubernetes continuously discovers matching pods and maintains an *endpoint list* (`kubectl get endpoints nginx-service`). Dead pods drop out automatically; replacements join.
+- **Type `NodePort`** → opens port **30080 on every node** and forwards to the pods, load-balancing across all three.
+- `nodePort: 30080` ↔ `targetPort: 80` ↔ `containerPort: 80`: **node → service → container** (must line up with `extraPortMappings` in `config.yaml`).
+
+### 🔗 The full path of a request
+
+```text
+curl http://localhost:30080
+   │
+   1️⃣  your machine → host port 30080
+   2️⃣  Docker/Podman port mapping → control-plane node container :30080
+   3️⃣  kube-proxy: NodePort 30080 → Service "nginx-service"
+   4️⃣  Service selector (app: nginx) → picks ONE of the 3 ready pods
+   5️⃣  DNAT → pod IP:80 → nginx answers
+   6️⃣  response retraces the path back to your terminal 🎉
+```
+
+Break any link and you get a specific symptom — that's what the [🩺 Troubleshooting](#-troubleshooting) table maps out.
 
 ---
 
