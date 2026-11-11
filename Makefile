@@ -11,13 +11,41 @@
 # Run `make` (or `make help`) to list all targets.
 # =============================================================================
 
-.PHONY: up deploy test status lint down help
+.PHONY: help install up deploy test status lint down
 
-CLUSTER := multinode
-URL     := http://localhost:30080
+CLUSTER   := multinode
+URL       := http://localhost:30080
+
+# --- make install settings ---------------------------------------------------
+BIN_DIR     := $(HOME)/.local/bin
+OS          := $(shell uname -s | tr '[:upper:]' '[:lower:]')
+ARCH        := $(shell uname -m | sed -e 's/x86_64/amd64/' -e 's/aarch64/arm64/' -e 's/armv7l/arm/')
+KIND_VER    := v0.33.0
+KUBECTL_VER := v1.37.0
 
 help: ## list all targets
-	@grep -E '^[a-z]+:.*##' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  \033[36m%-8s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  \033[36m%-8s\033[0m %s\n", $$1, $$2}'
+
+install: ## install kind + kubectl into ~/.local/bin
+	@mkdir -p $(BIN_DIR)
+	@command -v podman >/dev/null 2>&1 || command -v docker >/dev/null 2>&1 \
+		|| echo "⚠️  no container runtime found — install podman or docker first (see README)"
+	@if command -v kind >/dev/null 2>&1; then \
+		echo "✅ kind already installed: $$(kind version | head -1)"; \
+	else \
+		echo "⬇️  kind $(KIND_VER) → $(BIN_DIR)/kind"; \
+		curl -fsSL -o $(BIN_DIR)/kind "https://kind.sigs.k8s.io/dl/$(KIND_VER)/kind-$(OS)-$(ARCH)"; \
+		chmod +x $(BIN_DIR)/kind; \
+	fi
+	@if command -v kubectl >/dev/null 2>&1; then \
+		echo "✅ kubectl already installed: $$(kubectl version --client 2>/dev/null | head -1)"; \
+	else \
+		echo "⬇️  kubectl $(KUBECTL_VER) → $(BIN_DIR)/kubectl"; \
+		curl -fsSL -o $(BIN_DIR)/kubectl "https://dl.k8s.io/release/$(KUBECTL_VER)/bin/$(OS)/$(ARCH)/kubectl"; \
+		chmod +x $(BIN_DIR)/kubectl; \
+	fi
+	@case ":$$PATH:" in *":$(BIN_DIR):"*) echo "✅ $(BIN_DIR) is on your PATH";; \
+		*) echo "ℹ️  add it to your PATH:  export PATH=\"$$PATH:$(BIN_DIR)\"";; esac
 
 up: ## create the cluster (skips if it exists)
 	@kind get clusters | grep -qx $(CLUSTER) \

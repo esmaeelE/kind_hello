@@ -8,15 +8,11 @@
 
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-v1.37.0-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io/)
 [![KinD](https://img.shields.io/badge/KinD-local%20cluster-003D7C&logo=kubernetes&logoColor=white)](https://kind.sigs.k8s.io/)
-[![Nginx](https://img.shields.io/badge/Nginx-demo%20app-009639?logo=nginx&logoColor=white)](https://www.nginx.com/)
-[![kubectl](https://img.shields.io/badge/kubectl-required-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io/docs/tasks/tools/)
 [![License](https://img.shields.io/badge/license-GPL--3.0-green)](LICENSE)
 
 <br>
 
-<img src="https://img.shields.io/badge/cluster-4%20nodes%20%C2%B7%201%20control%20plane%20%2B%203%20workers-003D7C?style=for-the-badge&color=003D7C" alt="4 nodes">
-<img src="https://img.shields.io/badge/app-nginx%20%C2%B7%203%20replicas-009639?style=for-the-badge&color=009639" alt="nginx 3 replicas">
-<img src="https://img.shields.io/badge/port-localhost%3A30080-E6522C?style=for-the-badge&color=E6522C" alt="port 30080">
+[![4 nodes · nginx · 3 replicas · localhost:30080](https://img.shields.io/badge/4%20nodes-%C2%B7%20nginx%20%C2%B7%203%20replicas%20%C2%B7%20localhost%3A30080-003D7C?style=for-the-badge&color=003D7C)](#-quick-start)
 
 </div>
 
@@ -46,6 +42,7 @@
 - [🧹 Cleanup](#-cleanup)
 - [🩺 Troubleshooting](#-troubleshooting)
 - [📝 Notes](#-notes)
+- [📚 Further Reading](#-further-reading)
 - [📜 License](#-license)
 
 ---
@@ -67,12 +64,15 @@ curl http://localhost:30080
 
 > 💡 …or just open <http://localhost:30080> in your browser.
 
+![Terminal showing make status and make test returning the nginx welcome page](assets/demo-terminal.png)
+
 <details>
-<summary>🎬 <b>Prefer <code>make</code>? Same thing in four targets:</b></summary>
+<summary>🎬 <b>Prefer <code>make</code>? Same thing in five targets:</b></summary>
 
 <br>
 
 ```bash
+make install   # 📦 one-time: install kind + kubectl into ~/.local/bin
 make up        # 1️⃣ create the cluster (skips if it exists)
 make deploy    # 2️⃣ apply deployment.yaml + service.yaml
 make test      # 3️⃣ curl http://localhost:30080
@@ -121,7 +121,7 @@ The `unchanged` output from `kubectl apply` on a re-run is also normal — the r
 </tr>
 <tr>
   <td><code>🎬 Makefile</code></td>
-  <td>Convenience targets — <code>up</code>, <code>deploy</code>, <code>test</code>, <code>down</code>, <code>lint</code></td>
+  <td>Convenience targets — <code>install</code>, <code>up</code>, <code>deploy</code>, <code>test</code>, <code>down</code>, <code>lint</code></td>
 </tr>
 <tr>
   <td><code>🔁 renovate.json</code></td>
@@ -199,7 +199,7 @@ All four boot from the same digest-pinned image (`kindest/node:v1.37.0@sha256:�
 - Groups them with the label `app: nginx` — the hook that both the Deployment and the Service use 🏷️
 - The **readiness probe** gates what counts as *Ready*: a pod only enters rotation once it really answers HTTP ✅
 
-`kubectl get deployments` showing `3/3` means: desired 3, healthy 3 — not merely "3 containers started".
+`kubectl get deploy` showing `3/3` means: desired 3, healthy 3 — not merely "3 containers started".
 
 ### 🌍 The Service — *how* you reach it
 
@@ -228,11 +228,15 @@ Break any link and you get a specific symptom — that's what the [🩺 Troubles
 
 ## ✅ Prerequisites
 
-| 🛠️ Tool | 📥 Install |
+| 🛠️ Tool | 📦 Install |
 | --- | --- |
-| 🐧 **Podman** or **Docker** | Must be installed and running |
-| 🧷 **KinD** | <https://kind.sigs.k8s.io/docs/user/quick-start/> |
-| 🔧 **kubectl** | <https://kubernetes.io/docs/tasks/tools/> |
+| 🐧 **Podman** or **Docker** | Debian/Ubuntu: `sudo apt install podman` · macOS: `brew install podman` · or [Docker](https://docs.docker.com/get-docker/) |
+| 🧷 **KinD** `v0.33.0` | **`make install`** · `brew install kind` · or [manual download](https://kind.sigs.k8s.io/docs/user/quick-start/#installation) |
+| 🔧 **kubectl** `v1.37.x` | **`make install`** · `brew install kubectl` · or [install docs](https://kubernetes.io/docs/tasks/tools/) |
+
+> 📦 **`make install`** downloads pinned, official binaries of both kind and kubectl into `~/.local/bin` (and tells you if that's not on your `PATH` yet).
+>
+> 🧾 **Verified with:** kind `v0.33.0` · kubectl `v1.37.2` · Podman `6.1.1` · Kubernetes `v1.37.0` · Linux/amd64
 
 ---
 
@@ -250,13 +254,20 @@ kind create cluster --config config.yaml
 ```text
 enabling experimental podman provider
 Creating cluster "multinode" ...
-✓ Ensuring node image (kindest/node:v1.37.0) 🖼️
-✓ Preparing nodes 📦 📦 📦 📦
-✓ Writing configuration 📜
-✓ Starting control-plane 🕹️
-✓ Installing CNI 🔌
-✓ Installing StorageClass 💡
-✓ Joining worker nodes 🚜
+ • Ensuring node image (kindest/node:v1.37.0) 🖼️  ...
+ ✓ Ensuring node image (kindest/node:v1.37.0) 🖼️
+ • Preparing nodes 📦 📦 📦 📦   ...
+ ✓ Preparing nodes 📦 📦 📦 📦
+ • Writing configuration 📜  ...
+ ✓ Writing configuration 📜
+ • Starting control-plane 🕹️  ...
+ ✓ Starting control-plane 🕹️
+ • Installing CNI 🔌  ...
+ ✓ Installing CNI 🔌
+ • Installing StorageClass 💾  ...
+ ✓ Installing StorageClass 💾
+ • Joining worker nodes 🚜  ...
+ ✓ Joining worker nodes 🚜
 Set kubectl context to "kind-multinode"
 You can now use your cluster with:
 
@@ -283,36 +294,38 @@ kubectl get pods -A
 <summary>🖼️ <b>Expected output</b></summary>
 
 ```text
-Kubernetes control plane is running at https://127.0.0.1:36397
-CoreDNS is running at https://127.0.0.1:36397/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+Kubernetes control plane is running at https://127.0.0.1:34299
+CoreDNS is running at https://127.0.0.1:34299/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
 
 To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 
 NAME                      STATUS   ROLES           AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                       KERNEL-VERSION               CONTAINER-RUNTIME
-multinode-control-plane   Ready    control-plane   57s   v1.37.0   10.89.0.32    <none>        Debian GNU/Linux 13 (trixie)   7.2.11+deb14-amd64 (amd64)   containerd://2.3.4
-multinode-worker          Ready    <none>          47s   v1.37.0   10.89.0.33    <none>        Debian GNU/Linux 13 (trixie)   7.2.11+deb14-amd64 (amd64)   containerd://2.3.4
-multinode-worker2         Ready    <none>          47s   v1.37.0   10.89.0.31    <none>        Debian GNU/Linux 13 (trixie)   7.2.11+deb14-amd64 (amd64)   containerd://2.3.4
-multinode-worker3         Ready    <none>          47s   v1.37.0   10.89.0.34    <none>        Debian GNU/Linux 13 (trixie)   7.2.11+deb14-amd64 (amd64)   containerd://2.3.4
+multinode-control-plane   Ready    control-plane   26s   v1.37.0   10.89.0.46    <none>        Debian GNU/Linux 13 (trixie)   7.2.11+deb14-amd64 (amd64)   containerd://2.3.4
+multinode-worker          Ready    <none>          15s   v1.37.0   10.89.0.43    <none>        Debian GNU/Linux 13 (trixie)   7.2.11+deb14-amd64 (amd64)   containerd://2.3.4
+multinode-worker2         Ready    <none>          15s   v1.37.0   10.89.0.44    <none>        Debian GNU/Linux 13 (trixie)   7.2.11+deb14-amd64 (amd64)   containerd://2.3.4
+multinode-worker3         Ready    <none>          15s   v1.37.0   10.89.0.45    <none>        Debian GNU/Linux 13 (trixie)   7.2.11+deb14-amd64 (amd64)   containerd://2.3.4
 
 NAMESPACE            NAME                                              READY   STATUS    RESTARTS   AGE
-kube-system          coredns-559f6c778d-2s7rw                          1/1     Running   0          49s
-kube-system          coredns-559f6c778d-l8lhj                          1/1     Running   0          49s
-kube-system          etcd-multinode-control-plane                      1/1     Running   0          56s
-kube-system          kindnet-bglvv                                     1/1     Running   0          47s
-kube-system          kindnet-cbtzg                                     1/1     Running   0          47s
-kube-system          kindnet-qhwfm                                     1/1     Running   0          47s
-kube-system          kindnet-rdg7g                                     1/1     Running   0          49s
-kube-system          kube-apiserver-multinode-control-plane            1/1     Running   0          57s
-kube-system          kube-controller-manager-multinode-control-plane   1/1     Running   0          57s
-kube-system          kube-proxy-2c8zv                                  1/1     Running   0          47s
-kube-system          kube-proxy-n29b7                                  1/1     Running   0          49s
-kube-system          kube-proxy-qck8s                                  1/1     Running   0          47s
-kube-system          kube-proxy-sl5tf                                  1/1     Running   0          47s
-kube-system          kube-scheduler-multinode-control-plane            1/1     Running   0          56s
-local-path-storage   local-path-provisioner-75f7fc7dc5-fbzsk           1/1     Running   0          49s
+kube-system          coredns-559f6c778d-4fxjt                          1/1     Running   0          16s
+kube-system          coredns-559f6c778d-pr42b                          1/1     Running   0          16s
+kube-system          etcd-multinode-control-plane                      1/1     Running   0          24s
+kube-system          kindnet-bpzlr                                     1/1     Running   0          16s
+kube-system          kindnet-h2brt                                     1/1     Running   0          15s
+kube-system          kindnet-nzskr                                     1/1     Running   0          15s
+kube-system          kindnet-tk22b                                     1/1     Running   0          15s
+kube-system          kube-apiserver-multinode-control-plane            1/1     Running   0          25s
+kube-system          kube-controller-manager-multinode-control-plane   1/1     Running   0          24s
+kube-system          kube-proxy-548p8                                  1/1     Running   0          15s
+kube-system          kube-proxy-97q4b                                  1/1     Running   0          15s
+kube-system          kube-proxy-ll88z                                  1/1     Running   0          15s
+kube-system          kube-proxy-zmplm                                  1/1     Running   0          16s
+kube-system          kube-scheduler-multinode-control-plane            1/1     Running   0          24s
+local-path-storage   local-path-provisioner-75f7fc7dc5-b5hgg           1/1     Running   0          16s
 ```
 
 </details>
+
+> 🕐 Captured fresh from a real run — exact **IPs, ages, ports and pod names will differ** on your machine.
 
 ---
 
@@ -326,8 +339,8 @@ kubectl apply -f service.yaml
 Then check that everything is up:
 
 ```bash
-kubectl get deployments
-kubectl get services
+kubectl get deploy
+kubectl get svc
 kubectl get pods -l app=nginx -o wide
 ```
 
@@ -336,6 +349,27 @@ kubectl get pods -l app=nginx -o wide
 ✅ &nbsp;`nginx-deployment` reports **`3/3`** ready replicas &nbsp;·&nbsp; 🌐 &nbsp;`nginx-service` is **`NodePort`** on port **`30080`**
 
 </div>
+
+<details>
+<summary>🖼️ <b>Expected output</b></summary>
+
+```text
+NAME               READY   UP-TO-DATE   AVAILABLE   AGE
+nginx-deployment   3/3     3            3           59s
+
+NAME            TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
+kubernetes      ClusterIP   10.96.0.1      <none>        443/TCP        98s
+nginx-service   NodePort    10.96.114.81   <none>        80:30080/TCP   59s
+
+NAME                                READY   STATUS    RESTARTS   AGE   IP           NODE                NOMINATED NODE   READINESS GATES
+nginx-deployment-5fcfb85445-b85pq   1/1     Running   0          59s   10.244.3.2   multinode-worker3   <none>           <none>
+nginx-deployment-5fcfb85445-dzntd   1/1     Running   0          59s   10.244.2.2   multinode-worker2   <none>           <none>
+nginx-deployment-5fcfb85445-k5sz6   1/1     Running   0          59s   10.244.1.2   multinode-worker    <none>           <none>
+```
+
+</details>
+
+> 🕐 Note how the three pods land on three **different workers** — that's the scheduler spreading the replicas for you.
 
 ---
 
@@ -408,6 +442,19 @@ kind delete clusters --all
 | 📌 | The node image is pinned as `kindest/node:v1.37.0@sha256:…` — kind's release notes require the digest for a reproducible cluster. Re-pin it when upgrading Kubernetes. |
 | 🔁 | `renovate.json` makes Renovate open a PR whenever the `nginx:latest` digest moves. ⚠️ Requires the [Renovate GitHub App](https://github.com/apps/renovate) — Dependabot can't read Kubernetes manifests. |
 | 🐛 | Something not working? Check `kubectl get nodes` and `kubectl get pods -A` first — the control plane may still be starting. |
+
+---
+
+## 📚 Further Reading
+
+| 📖 Topic | 🔗 Link |
+| --- | --- |
+| 🧷 Getting started with KinD | <https://kind.sigs.k8s.io/docs/user/quick-start/> |
+| ☸️ Kubernetes documentation | <https://kubernetes.io/docs/home/> |
+| 🔧 `kubectl` cheat sheet | <https://kubernetes.io/docs/reference/kubectl/cheatsheet/> |
+| 🚀 Deployments — the *what* of this demo | <https://kubernetes.io/docs/concepts/workloads/controllers/deployment/> |
+| 🌐 Services — the *how* of this demo | <https://kubernetes.io/docs/concepts/services-networking/service/> |
+| 🏷️ Labels & selectors — what glues them together | <https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/> |
 
 ---
 
