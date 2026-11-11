@@ -1,12 +1,32 @@
+# =============================================================================
+# Nginx demo — Kubernetes Service (NodePort)
+# =============================================================================
+# Exposes the nginx pods on port 30080 of every node, which is forwarded to
+# your host via the extraPortMappings in config.yaml — so the app is reachable
+# at http://localhost:30080
+#
+# Apply with:
+#   kubectl apply -f service.yaml
+# =============================================================================
+
 apiVersion: v1
 kind: Service
 metadata:
+  # Service name (other pods can reach it as "nginx-service")
   name: nginx-service
 spec:
+  # NodePort: opens a static port (30080) on all cluster nodes.
+  # Valid NodePort range: 30000–32767.
   type: NodePort
+
+  # --- Traffic routing ---------------------------------------------------------
+  # Forwards to every pod whose labels match these selectors —
+  # must match the pod template labels in deployment.yaml.
   selector:
     app: nginx
+
+  # --- Ports -------------------------------------------------------------------
   ports:
-    - port: 80
-      targetPort: 80
-      nodePort: 30080
+    - port: 80         # cluster-internal port (other pods call this)
+      targetPort: 80   # container port the traffic is forwarded to
+      nodePort: 30080  # port published on the node (and on your host)

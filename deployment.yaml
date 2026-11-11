@@ -1,19 +1,41 @@
+# =============================================================================
+# Nginx demo — Kubernetes Deployment
+# =============================================================================
+# Runs 3 replicas of nginx across the worker nodes.
+#
+# Apply with:
+#   kubectl apply -f deployment.yaml
+# =============================================================================
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  # Deployment name (shows up in `kubectl get deployments`)
   name: nginx-deployment
 spec:
+  # Number of pod replicas to keep running
   replicas: 3
+
+  # --- Selector ---------------------------------------------------------------
+  # Which pods this Deployment owns. Must match the template labels below.
   selector:
     matchLabels:
       app: nginx
+
+  # --- Pod template -----------------------------------------------------------
+  # The blueprint for every pod this Deployment creates.
   template:
     metadata:
+      # Labels used by the selector and by the Service (service.yaml)
+      # to route traffic to these pods.
       labels:
         app: nginx
     spec:
       containers:
         - name: nginx
+          # Nginx web server image (use a pinned tag in real projects,
+          # e.g. nginx:1.27 — :latest is fine for demos only)
           image: nginx:latest
           ports:
+            # Port exposed inside the pod; the Service forwards here.
             - containerPort: 80

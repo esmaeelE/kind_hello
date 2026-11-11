@@ -1,0 +1,31 @@
+# =============================================================================
+# KinD — minimal cluster configuration (test / quick-start variant)
+# =============================================================================
+# Same 4-node topology as config.yaml (1 control-plane + 3 workers), but with
+# no kubeadm patches and no port mappings. Use this when you just want a plain
+# cluster as fast as possible.
+#
+# Create the cluster with:
+#   kind create cluster --config config-test.yaml
+#
+# NOTE: there is no extraPortMappings here, so NodePort services (e.g. the
+#       demo on 30080) will NOT be reachable from your host — use config.yaml
+#       for that.
+# =============================================================================
+
+# KinD cluster API version
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+
+# Name of the cluster (also becomes the kubectl context: "kind-multinode")
+name: multinode
+
+# -----------------------------------------------------------------------------
+# nodes
+# Topology of the cluster: 1 control-plane node + 3 worker nodes (4 total).
+# -----------------------------------------------------------------------------
+nodes:
+  - role: control-plane   # runs the API server, etcd, scheduler, controllers
+  - role: worker
+  - role: worker
+  - role: worker

@@ -1,0 +1,14 @@
+# markdownlint configuration for this repository
+# https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+config:
+  # Long lines: badges, tables and copy-paste terminal output legitimately
+  # exceed 80 characters — wrapping them would hurt readability.
+  MD013: false
+  # Inline HTML: <div align>, <a id>, <details>/<summary> and <table> are used
+  # intentionally for layout, anchors and collapsible output blocks.
+  MD033: false
+  # The file intentionally opens with a centered <div> header block instead
+  # of a bare H1 on line 1.
+  MD041: false
+  # Emphasized subtitle / footer lines are decorative text, not headings.
+  MD036: false

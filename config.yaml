@@ -1,36 +1,70 @@
-# KinD (Kubernetes in Docker) cluster configuration
-# This file defines a multi-node local Kubernetes cluster for development and testing
-# this config file contains all config fields with comments
-# NOTE: this is not a particularly useful config file
+# =============================================================================
+# KinD (Kubernetes in Docker) — cluster configuration
+# =============================================================================
+# Defines a multi-node local Kubernetes cluster for development and testing.
+#
+# Create the cluster with:
+#   kind create cluster --config config.yaml
+#
+# NOTE: this file intentionally shows a wide range of config fields with
+#       comments — it is a "kitchen sink" example, not a particularly useful
+#       config file for production. Trim it to what you need.
+# =============================================================================
+
+# KinD cluster API version — do not change unless upgrading KinD
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
+
+# Name of the cluster (also becomes the kubectl context: "kind-multinode")
 name: multinode
-# patch the generated kubeadm config with some extra settings
+
+# -----------------------------------------------------------------------------
+# kubeadmConfigPatches
+# Raw YAML merged into the kubeadm-generated config before the nodes boot.
+# Here we patch the kubelet configuration.
+# -----------------------------------------------------------------------------
 kubeadmConfigPatches:
   - |
     apiVersion: kubelet.config.k8s.io/v1beta1
     kind: KubeletConfiguration
+    # Kubelet hard eviction thresholds.
+    # Setting nodefs.available to "0%" effectively disables disk-based
+    # eviction — handy for small local/dev machines, risky otherwise.
     evictionHard:
       nodefs.available: "0%"
-# patch it further using a JSON 6902 patch
+
+# -----------------------------------------------------------------------------
+# kubeadmConfigPatchesJSON6902
+# Further patches applied in JSON 6902 format (op / path / value).
+# -----------------------------------------------------------------------------
 kubeadmConfigPatchesJSON6902:
   - group: kubeadm.k8s.io
     version: v1beta3
     kind: ClusterConfiguration
+    # Add an extra Subject Alternative Name to the API server certificate,
+    # so the API server can also be reached via "my-hostname".
     patch: |
       - op: add
         path: /apiServer/certSANs/-
         value: my-hostname
-# 1 control plane node and 3 workers
+
+# -----------------------------------------------------------------------------
+# nodes
+# Topology of the cluster: 1 control-plane node + 3 worker nodes (4 total).
+# -----------------------------------------------------------------------------
 nodes:
-  # the control plane node config
+  # --- Control-plane node -----------------------------------------------------
   - role: control-plane
-    # expose port 30080 in the cluster
+    # Publish container ports on the host machine.
+    # This is what makes the demo service reachable at localhost:30080 —
+    # it must match the NodePort set in service.yaml (30080).
     extraPortMappings:
-      - containerPort: 30080
-        hostPort: 30080
+      - containerPort: 30080   # port opened inside the node container
+        hostPort: 30080        # port published on your machine
         protocol: TCP
-  # the three workers
+
+  # --- Worker nodes -----------------------------------------------------------
+  # Three identical workers; pods from the deployment are spread across them.
   - role: worker
   - role: worker
   - role: worker
