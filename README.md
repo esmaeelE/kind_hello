@@ -64,8 +64,6 @@ curl http://localhost:30080
 
 > 💡 …or just open <http://localhost:30080> in your browser.
 
-![Terminal showing make status and make test returning the nginx welcome page](assets/demo-terminal.png)
-
 <details>
 <summary>🎬 <b>Prefer <code>make</code>? Same thing in five targets:</b></summary>
 
