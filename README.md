@@ -349,7 +349,7 @@ kubectl get pods -l app=nginx -o wide
 
 <div align="center">
 
-✅ &nbsp;`nginx-deployment` reports **`3/3`** ready replicas &nbsp;·&nbsp; 🌐 &nbsp;`nginx-service` is **`NodePort`** on port **`30080`**
+✅ 🎉 &nbsp;`nginx-deployment` reports **`3/3`** ready replicas &nbsp;·&nbsp; 🌐 &nbsp;`nginx-service` is **`NodePort`** on port **`30080`**
 
 </div>
 
