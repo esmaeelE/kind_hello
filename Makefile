@@ -13,9 +13,8 @@
 
 .PHONY: up deploy test status lint down help
 
-CLUSTER   := multinode
-MANIFESTS := deployment.yaml service.yaml
-URL       := http://localhost:30080
+CLUSTER := multinode
+URL     := http://localhost:30080
 
 help: ## list all targets
 	@grep -E '^[a-z]+:.*##' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  \033[36m%-8s\033[0m %s\n", $$1, $$2}'
@@ -26,7 +25,7 @@ up: ## create the cluster (skips if it exists)
 		|| kind create cluster --config config.yaml
 
 deploy: ## apply deployment.yaml + service.yaml
-	kubectl apply -f $(MANIFESTS)
+	kubectl apply -f deployment.yaml -f service.yaml
 
 test: ## curl the demo service
 	@echo "GET $(URL)"
@@ -41,5 +40,5 @@ lint: ## lint the README with markdownlint-cli2
 	npx --yes markdownlint-cli2 "**/*.md"
 
 down: ## tear down the cluster and demo app
-	-kubectl delete -f $(MANIFESTS) --ignore-not-found
+	-kubectl delete -f deployment.yaml -f service.yaml --ignore-not-found
 	-kind delete cluster --name $(CLUSTER)
