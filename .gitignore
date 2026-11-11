@@ -1,0 +1,17 @@
+# --- Editor / IDE ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- Logs / local tool output ---
+*.log
+
+# --- Never commit cluster kubeconfig copies ---
+kubeconfig
+*.kubeconfig

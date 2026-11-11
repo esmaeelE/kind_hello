@@ -159,6 +159,8 @@ graph TB
 kind create cluster --config config.yaml
 ```
 
+> ⚡ Prefer the bare-bones variant? Use `kind create cluster --config config-test.yaml` instead — same 4 nodes, no kubeadm patches or port mapping (so no `localhost:30080`).
+
 <details>
 <summary>🖼️ <b>Expected output</b></summary>
 
