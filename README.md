@@ -18,7 +18,11 @@
 
 ---
 
+<div align="center">
+
 > 🐳 Built with **[KinD](https://kind.sigs.k8s.io/)** (Kubernetes in Docker): a **4-node cluster** (1 control plane + 3 workers) plus a demo **Nginx deployment** and **NodePort service** exposed on your host at port `30080`.
+
+</div>
 
 <div align="center">
 
