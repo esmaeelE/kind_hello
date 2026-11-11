@@ -39,3 +39,35 @@ spec:
           ports:
             # Port exposed inside the pod; the Service forwards here.
             - containerPort: 80
+
+          # --- Health probes -----------------------------------------------------
+          # Ready only counts once nginx actually answers HTTP — so
+          # `make status` shows 3/3 only when the app is really serving.
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            failureThreshold: 3
+
+          # Restarts the container if nginx stops answering (crash/hang).
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+
+          # --- Resources ---------------------------------------------------------
+          # Small demo-sized budget. Without these, one runaway pod could
+          # starve the whole node — and pods would show no usage in
+          # `kubectl top`/`describe`.
+          resources:
+            requests:
+              cpu: 50m
+              memory: 32Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi

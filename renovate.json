@@ -1,0 +1,19 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "labels": ["dependencies"],
+  "schedule": ["every weekend"],
+  "commitMessageTopic": "kubernetes image",
+  "kubernetes": {
+    "pinDigests": true
+  },
+  "packageRules": [
+    {
+      "description": "nginx demo image — PR when the :latest digest moves",
+      "matchManagers": ["kubernetes"],
+      "matchPackageNames": ["nginx"],
+      "pinDigests": true,
+      "automerge": false
+    }
+  ]
+}

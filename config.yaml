@@ -51,10 +51,16 @@ kubeadmConfigPatchesJSON6902:
 # -----------------------------------------------------------------------------
 # nodes
 # Topology of the cluster: 1 control-plane node + 3 worker nodes (4 total).
+#
+# The node image is pinned by tag AND digest (kind v0.33.0's default image).
+# The @sha256 digest guarantees the exact image built for this release —
+# kind's own release notes say to pin it for security and reproducibility:
+#   https://github.com/kubernetes-sigs/kind/releases/tag/v0.33.0
 # -----------------------------------------------------------------------------
 nodes:
   # --- Control-plane node -----------------------------------------------------
   - role: control-plane
+    image: kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5
     # Publish container ports on the host machine.
     # This is what makes the demo service reachable at localhost:30080 —
     # it must match the NodePort set in service.yaml (30080).
@@ -65,6 +71,10 @@ nodes:
 
   # --- Worker nodes -----------------------------------------------------------
   # Three identical workers; pods from the deployment are spread across them.
+  # All nodes use the same digest-pinned image as the control plane.
   - role: worker
+    image: kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5
   - role: worker
+    image: kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5
   - role: worker
+    image: kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5

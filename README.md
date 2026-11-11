@@ -104,7 +104,7 @@ The `unchanged` output from `kubectl apply` on a re-run is also normal — the r
 <tr><th>📄 File</th><th>📝 Description</th></tr>
 <tr>
   <td><code>🧩 config.yaml</code></td>
-  <td>Full-featured KinD cluster config — kubeadm patches, eviction thresholds, <code>certSANs</code>, port mapping</td>
+  <td>Full-featured KinD cluster config — kubeadm patches, eviction thresholds, <code>certSANs</code>, port mapping, <b>digest-pinned node image</b></td>
 </tr>
 <tr>
   <td><code>⚡ config-test.yaml</code></td>
@@ -112,7 +112,7 @@ The `unchanged` output from `kubectl apply` on a re-run is also normal — the r
 </tr>
 <tr>
   <td><code>🚀 deployment.yaml</code></td>
-  <td><code>nginx-deployment</code> — 3 replicas of <code>nginx:latest</code> listening on port 80</td>
+  <td><code>nginx-deployment</code> — 3 replicas of <code>nginx:latest</code> with readiness/liveness probes and CPU/memory requests</td>
 </tr>
 <tr>
   <td><code>🌐 service.yaml</code></td>
@@ -121,6 +121,10 @@ The `unchanged` output from `kubectl apply` on a re-run is also normal — the r
 <tr>
   <td><code>🎬 Makefile</code></td>
   <td>Convenience targets — <code>up</code>, <code>deploy</code>, <code>test</code>, <code>down</code>, <code>lint</code></td>
+</tr>
+<tr>
+  <td><code>🔁 renovate.json</code></td>
+  <td>Renovate config — opens a PR when the <code>nginx:latest</code> digest changes (install the Renovate GitHub App to activate)</td>
 </tr>
 </table>
 
@@ -341,6 +345,8 @@ kind delete clusters --all
 | 🧩 | `config.yaml` demonstrates a wide range of KinD/kubeadm options — it is intentionally a **"kitchen sink"** example. Trim it to what you need. |
 | ⚡ | `config-test.yaml` is the stripped-down equivalent if you just want the same 4-node topology. ⚠️ It has **no `extraPortMappings`**, so NodePort `30080` is not reachable from your host. |
 | ✏️ | Feel free to adapt `deployment.yaml` and `service.yaml` to your own application. |
+| 📌 | The node image is pinned as `kindest/node:v1.37.0@sha256:…` — kind's release notes require the digest for a reproducible cluster. Re-pin it when upgrading Kubernetes. |
+| 🔁 | `renovate.json` makes Renovate open a PR whenever the `nginx:latest` digest moves. ⚠️ Requires the [Renovate GitHub App](https://github.com/apps/renovate) — Dependabot can't read Kubernetes manifests. |
 | 🐛 | Something not working? Check `kubectl get nodes` and `kubectl get pods -A` first — the control plane may still be starting. |
 
 ---
