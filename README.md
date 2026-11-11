@@ -36,13 +36,14 @@
 
 - [🏁 Quick Start](#-quick-start)
 - [📁 Repository Layout](#-repository-layout)
-- [🏗️ Architecture](#-architecture)
+- [🏗 Architecture](#-architecture)
 - [✅ Prerequisites](#-prerequisites)
 - [🚀 Step 1 — Create the Cluster](#-step-1--create-the-cluster)
 - [🔍 Step 2 — Verify the Cluster](#-step-2--verify-the-cluster)
 - [🚀 Step 3 — Deploy the Demo App](#-step-3--deploy-the-demo-app)
 - [🌐 Step 4 — Access the Service](#-step-4--access-the-service)
 - [🧹 Cleanup](#-cleanup)
+- [🩺 Troubleshooting](#-troubleshooting)
 - [📝 Notes](#-notes)
 - [📜 License](#-license)
 
@@ -64,6 +65,20 @@ curl http://localhost:30080
 ```
 
 > 💡 …or just open <http://localhost:30080> in your browser.
+
+<details>
+<summary>🎬 <b>Prefer <code>make</code>? Same thing in four targets:</b></summary>
+
+<br>
+
+```bash
+make up        # 1️⃣ create the cluster (skips if it exists)
+make deploy    # 2️⃣ apply deployment.yaml + service.yaml
+make test      # 3️⃣ curl http://localhost:30080
+make down      # 🗑️ tear the cluster down again
+```
+
+</details>
 
 <details>
 <summary>⚠️ <b>Got <code>node(s) already exist for a cluster with the name "multinode"</code>?</b></summary>
@@ -102,6 +117,10 @@ The `unchanged` output from `kubectl apply` on a re-run is also normal — the r
 <tr>
   <td><code>🌐 service.yaml</code></td>
   <td><code>nginx-service</code> — a <code>NodePort</code> service mapping <code>30080 → 80</code></td>
+</tr>
+<tr>
+  <td><code>🎬 Makefile</code></td>
+  <td>Convenience targets — <code>up</code>, <code>deploy</code>, <code>test</code>, <code>down</code>, <code>lint</code></td>
 </tr>
 </table>
 
@@ -297,6 +316,21 @@ kind delete cluster
 # 🗑️💥 delete every KinD cluster
 kind delete clusters --all
 ```
+
+---
+
+## 🩺 Troubleshooting
+
+| 😵 Symptom | 🔍 Likely cause | 🛠️ Fix |
+| --- | --- | --- |
+| `node(s) already exist for a cluster with the name "multinode"` | The cluster is already running — `kind create` won't reuse a name | Skip creation, or `kind delete cluster --name multinode` first |
+| `curl: (7) Failed to connect … port 30080` | Cluster was made with `config-test.yaml` (no `extraPortMappings`), or the control plane isn't ready | Use `config.yaml`, then `kubectl get nodes` until all are `Ready` |
+| `kubectl` errors like `connection refused` / wrong cluster | Your context points elsewhere | `kubectl config use-context kind-multinode` |
+| Pods stuck `Pending` | Nodes out of CPU/memory (4 nodes × small machine) | `kubectl describe pod <name>` — check the `Events` section |
+| `502`/`504` from the service, or `curl` returns nothing | Service selector doesn't match any pod | `kubectl get endpoints nginx-service` must list pod IPs |
+| `bind: address already in use` on cluster create | Host port `30080` is taken by another process | Stop it, or change **both** `hostPort` (`config.yaml`) and `nodePort` (`service.yaml`) |
+
+> 🐛 Still stuck? `kubectl get pods -A` + `kubectl get events --sort-by=.lastTimestamp` usually names the real problem.
 
 ---
 
