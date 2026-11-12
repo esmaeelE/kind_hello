@@ -436,7 +436,7 @@ kind delete clusters --all
 
 ## 📝 Notes
 
-| | 💡 Tip |
+| Icon | Description |
 | --- | --- |
 | 🧩 | `config.yaml` demonstrates a wide range of KinD/kubeadm options — it is intentionally a **"kitchen sink"** example. Trim it to what you need. |
 | ⚡ | `config-test.yaml` is the stripped-down equivalent if you just want the same 4-node topology. ⚠️ It has **no `extraPortMappings`**, so NodePort `30080` is not reachable from your host. |

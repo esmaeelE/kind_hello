@@ -11,7 +11,7 @@
 # Run `make` (or `make help`) to list all targets.
 # =============================================================================
 
-.PHONY: help install up deploy test status lint down
+.PHONY: help install up deploy test status lint down nuke
 
 CLUSTER   := multinode
 URL       := http://localhost:30080
@@ -70,3 +70,6 @@ lint: ## lint the README with markdownlint-cli2
 down: ## tear down the cluster and demo app
 	-kubectl delete -f deployment.yaml -f service.yaml --ignore-not-found
 	-kind delete cluster --name $(CLUSTER)
+
+nuke: ## delete all KinD clusters
+	-kind delete clusters --all
